@@ -68,6 +68,83 @@ Four sample profiles (two women, two men; one ordinary and one flagged case each
 
 Clinic view: load past ferritin results (sample file, or the public national health survey) and drag a cutoff slider from 15 to 30 to 50 to see how many "normal" patients fall below the new lines.
 
+## Additions (Nov 15, ~12:55 PM)
+
+These build on the leading idea above. They came out of two concerns: the idea needed more depth and a stronger biotech core, and people are not always honest when answering questions about themselves.
+
+### Design shift: lean on lab numbers, not only on what people say
+
+- Self-reported symptoms can be forgotten, downplayed, or left out. Blood test numbers do not depend on honesty.
+- Most people have had a routine blood count but never an iron (ferritin) test. The tool uses the blood count already on file to flag who probably has low iron and should be tested.
+- If a ferritin result exists, the tool re-reads it against the 2026 cutoffs.
+- The chat stays, but the tool must still work when the chat is skipped.
+- Pitch line: "Symptoms get missed because patients forget, downplay, or are not asked. So we also use the blood test they have already had."
+
+### Biotech layers (all software, no hardware)
+
+**Layer 1: prediction model on public blood data**
+
+- Estimates the chance that a person's iron stores are low.
+- Data: US national health survey (NHANES), 2017 to March 2020. This is the cycle to use because ferritin was measured in everyone aged 12 and up, both sexes. Earlier cycles tested only women 12 to 49 and young children.
+- Target: ferritin below 30 = low.
+- Inputs: age, sex, period status, hemoglobin, red blood cell size.
+- Method: logistic regression, 80/20 train/test split, report accuracy on the held-back 20%.
+- Deploy: copy the fitted coefficients into the page as a formula, so no server is needed.
+- Limit: the survey asks whether periods are regular, not how heavy they are. The model cannot learn from the heavy-period questions, so those questions only decide which guideline cutoff applies.
+
+**Layer 2: iron panel reader**
+
+- Applies the guideline rules across several lab values at once:
+  - Ferritin 30 or lower: low iron stores.
+  - Ferritin 50 or lower with heavy periods reported: low for a high-risk patient.
+  - Inflammation present: cutoff becomes ferritin 100 or lower, or transferrin saturation under 20%.
+- Why: illness pushes ferritin up and can hide a deficiency that a single cutoff would miss.
+
+**Layer 3: hepcidin research note (doctor's page only)**
+
+- A short "what the research says" box about hepcidin, the hormone that controls iron absorption, and what it implies for how iron is taken.
+- NOT VERIFIED. Written from memory and touches treatment. Needs a real citation before it appears anywhere, or it gets cut.
+
+### Add-ons for uniqueness and nuance
+
+| # | Add-on | What it does | Plan |
+| --- | --- | --- | --- |
+| 1 | Mismatch detector | Flags when what the patient says and what the lab pattern suggests disagree (for example "I feel fine" with a 70% model estimate) | Build. Signature feature |
+| 2 | Personal trend | With two or more past results, shows the direction against the person's own baseline (hemoglobin 14.0 to 12.2 is "normal" twice but still a decline) | Roadmap, or build if time |
+| 3 | Show the disagreement | Displays where the patient falls under each cutoff (15, 30, 50), who recommends each, and that the new ones are conditional | Build |
+| 4 | Fairness check | Reports model accuracy separately by sex and by racial and ethnic group | Build if the model is done by mid-afternoon |
+| 5 | Life-stage paths | Adjusts for teen, pregnant, recently gave birth, past menopause | Roadmap only |
+
+Pitch line for add-on 1: "We do not ask whether to believe the patient or the lab. We show the doctor where they disagree."
+
+### How the pieces connect
+
+| Step | What happens | Part |
+| --- | --- | --- |
+| 1 | Patient completes the chat (optional) | Chat |
+| 2 | Model estimates the chance of low iron from the blood count | Layer 1 |
+| 3 | If iron labs exist, the panel reader applies the guideline | Layer 2 |
+| 4 | Mismatch detector compares steps 1 and 2 | Add-on 1 |
+| 5 | Doctor sees symptoms, estimate, panel result under each cutoff, and any mismatch | Doctor's page |
+
+### Suggested split of work
+
+- Person 1: the model (data download, fit, test, fairness check).
+- Person 2: chat questions, panel rules, mismatch logic.
+- Person 3: the page, doctor's view, and hosting.
+
+### Limits to state in the pitch
+
+- The model is trained on survey data and has not been tested in a clinic.
+- It suggests who to test. It does not diagnose.
+- The survey needs weighting to represent the US population; an unweighted hackathon model is acceptable if we say so.
+
+### More to verify
+
+- [ ] Open the NHANES blood count and inflammation (CRP) files and confirm they exist for 2017 to March 2020. Ferritin, iron, and the women's questionnaire are confirmed.
+- [ ] Find a citation for the hepcidin note, or cut it.
+- [ ] Team scope: `AGENTS.md` says the project is "not medical-based" (decision logged 10:21 AM). This idea is medical. Resolve as a team.
+
 ## Other ideas considered
 
 | Idea | What it does | Why not chosen (so far) |
@@ -87,3 +164,7 @@ Clinic view: load past ferritin results (sample file, or the public national hea
 - Higham et al., pictorial blood loss chart, 1990: https://doi.org/10.1111/j.1471-0528.1990.tb16249.x
 - Core IM iron deficiency segment (heavy-period history questions): https://www.tomwademd.net/?p=159722
 - NBC News on missed iron deficiency: https://www.nbcnews.com/health/health-news/iron-deficiency-often-missed-young-women-girls-research-finds-rcna92046
+- NHANES 2017-2018 ferritin documentation: https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public/2017/DataFiles/FERTIN_J.htm
+- NHANES 2017-March 2020 ferritin documentation: https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public/2017/DataFiles/P_FERTIN.htm
+- NHANES 2017-2018 iron status documentation: https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public/2017/DataFiles/FETIB_J.htm
+- NHANES 2017-2018 reproductive health questionnaire: https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public/2017/DataFiles/RHQ_J.htm
