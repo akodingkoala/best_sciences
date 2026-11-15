@@ -68,6 +68,7 @@ Open question: submission platform and upload cutoff were not announced at kicko
 
 Fill these in once decided. Keep each to one or two lines.
 
+- **Scope:** We are **not medical-based**. Do not build a medical or clinical product.
 - **Name:** TBD
 - **Problem:** TBD
 - **Research insight we build on (with citation/link):** TBD
@@ -100,6 +101,7 @@ Update this whenever you finish a chunk of work, so the next agent or teammate c
 
 Newest first. One line each: time, decision, why.
 
+- 10:21 AM – The project is not medical-based.
 - 10:00 AM – Targeting Track 01 Best Translational Science (headphones).
 
 ## Working rules for agents
