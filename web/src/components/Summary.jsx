@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { buildSummary, summaryToText } from '../lib/summary.js'
 import SupportBanner from './SupportBanner.jsx'
 import ShareQR from './ShareQR.jsx'
+import ChatWidget from './ChatWidget.jsx'
 
 function PatientView({ summary }) {
   const { discuss, noteOnly, questions } = summary
@@ -147,6 +148,7 @@ export function ClinicianView({ summary }) {
 
 export default function Summary({ state, onEdit, onReset, onConsent }) {
   const summary = useMemo(() => buildSummary(state), [state])
+  const chatContext = useMemo(() => summaryToText(summary), [summary])
   const [view, setView] = useState('patient')
   const [copied, setCopied] = useState(false)
 
@@ -218,6 +220,8 @@ export default function Summary({ state, onEdit, onReset, onConsent }) {
           Start over
         </button>
       </div>
+
+      <ChatWidget context={chatContext} />
     </section>
   )
 }

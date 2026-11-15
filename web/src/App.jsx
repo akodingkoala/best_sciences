@@ -175,7 +175,8 @@ export default function App() {
       <footer className="footer">
         <p>
           Prototype built at HackRx 2026. Not medical advice and not a substitute for care. Your answers stay
-          in this browser tab and are never sent anywhere. In an emergency, call 911.
+          in this browser tab. They are only sent to an AI service if you use "Ask about my card" on your visit
+          card. In an emergency, call 911.
         </p>
         <p className="footer-link">
           <a href="#/clinic">Clinic staff: open the scanner</a>
