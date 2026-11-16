@@ -2,6 +2,10 @@
 
 #we love SSD's
 
+#making patients process faster and more comfortable
+
+#doctors can get a head start on patient symptoms
+
 
 ## Run the prototype (Vite + React)
 
