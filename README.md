@@ -1,6 +1,6 @@
 # best_sciences
 
-#we are making the best translational hack :D
+#we love SSD's
 
 
 ## Run the prototype (Vite + React)
